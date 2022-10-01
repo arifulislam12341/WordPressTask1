@@ -19,6 +19,7 @@ $main_column_size = bootstrapBasicGetMainColumnSize();
 
 						<header class="page-header">
 							<h1 class="page-title">
+							
 								<?php
 								if (is_category()) :
 									single_cat_title();

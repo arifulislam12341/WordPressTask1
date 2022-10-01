@@ -1,4 +1,202 @@
 <?php
+// Cars
+
+function cptui_register_my_cpts() {
+
+	/**
+	 * Post Type: Cars.
+	 */
+
+	$labels = [
+		"name" => esc_html__( "Cars", "bootstrap-basic" ),
+		"singular_name" => esc_html__( "Car", "bootstrap-basic" ),
+	];
+
+	$args = [
+		"label" => esc_html__( "Cars", "bootstrap-basic" ),
+		"labels" => $labels,
+		"description" => "",
+		"public" => true,
+		"publicly_queryable" => true,
+		"show_ui" => true,
+		"show_in_rest" => true,
+		"rest_base" => "",
+		"rest_controller_class" => "WP_REST_Posts_Controller",
+		"rest_namespace" => "wp/v2",
+		"has_archive" => true,
+		"show_in_menu" => true,
+		"show_in_nav_menus" => true,
+		"delete_with_user" => false,
+		"exclude_from_search" => false,
+		"capability_type" => "post",
+		"map_meta_cap" => true,
+		"hierarchical" => true,
+		"can_export" => false,
+		"rewrite" => [ "slug" => "car", "with_front" => true ],
+		"query_var" => true,
+		"menu_position" => 5,
+		"menu_icon" => "dashicons-car",
+		"supports" => [ "title", "editor", "thumbnail" ],
+		"show_in_graphql" => false,
+	];
+
+	register_post_type( "car", $args );
+}
+
+add_action( 'init', 'cptui_register_my_cpts' );
+function cptui_register_my_taxes() {
+
+	/**
+	 * Taxonomy: Makes.
+	 */
+
+	$labels = [
+		"name" => esc_html__( "Makes", "bootstrap-basic" ),
+		"singular_name" => esc_html__( "Make", "bootstrap-basic" ),
+	];
+
+	
+	$args = [
+		"label" => esc_html__( "Makes", "bootstrap-basic" ),
+		"labels" => $labels,
+		"public" => true,
+		"publicly_queryable" => true,
+		"hierarchical" => true,
+		"show_ui" => true,
+		"show_in_menu" => true,
+		"show_in_nav_menus" => true,
+		"query_var" => true,
+		"rewrite" => [ 'slug' => 'make', 'with_front' => true,  'hierarchical' => true, ],
+		"show_admin_column" => true,
+		"show_in_rest" => true,
+		"show_tagcloud" => false,
+		"rest_base" => "make",
+		"rest_controller_class" => "WP_REST_Terms_Controller",
+		"rest_namespace" => "wp/v2",
+		"show_in_quick_edit" => true,
+		"sort" => false,
+		"show_in_graphql" => false,
+	];
+	register_taxonomy( "make", [ "car" ], $args );
+
+	/**
+	 * Taxonomy: Models.
+	 */
+
+	$labels = [
+		"name" => esc_html__( "Models", "bootstrap-basic" ),
+		"singular_name" => esc_html__( "Model", "bootstrap-basic" ),
+	];
+
+	
+	$args = [
+		"label" => esc_html__( "Models", "bootstrap-basic" ),
+		"labels" => $labels,
+		"public" => true,
+		"publicly_queryable" => true,
+		"hierarchical" => true,
+		"show_ui" => true,
+		"show_in_menu" => true,
+		"show_in_nav_menus" => true,
+		"query_var" => true,
+		"rewrite" => [ 'slug' => 'model', 'with_front' => true,  'hierarchical' => true, ],
+		"show_admin_column" => true,
+		"show_in_rest" => true,
+		"show_tagcloud" => false,
+		"rest_base" => "model",
+		"rest_controller_class" => "WP_REST_Terms_Controller",
+		"rest_namespace" => "wp/v2",
+		"show_in_quick_edit" => true,
+		"sort" => false,
+		"show_in_graphql" => false,
+	];
+	register_taxonomy( "model", [ "car" ], $args );
+
+	/**
+	 * Taxonomy: Years.
+	 */
+
+	$labels = [
+		"name" => esc_html__( "Years", "bootstrap-basic" ),
+		"singular_name" => esc_html__( "Year", "bootstrap-basic" ),
+	];
+
+	
+	$args = [
+		"label" => esc_html__( "Years", "bootstrap-basic" ),
+		"labels" => $labels,
+		"public" => true,
+		"publicly_queryable" => true,
+		"hierarchical" => true,
+		"show_ui" => true,
+		"show_in_menu" => true,
+		"show_in_nav_menus" => true,
+		"query_var" => true,
+		"rewrite" => [ 'slug' => 'car_years', 'with_front' => true,  'hierarchical' => true, ],
+		"show_admin_column" => true,
+		"show_in_rest" => true,
+		"show_tagcloud" => false,
+		"rest_base" => "car_years",
+		"rest_controller_class" => "WP_REST_Terms_Controller",
+		"rest_namespace" => "wp/v2",
+		"show_in_quick_edit" => true,
+		"sort" => false,
+		"show_in_graphql" => false,
+	];
+	register_taxonomy( "car_years", [ "car" ], $args );
+}
+add_action( 'init', 'cptui_register_my_taxes' );
+
+// Set the archive post as front page
+function prefix_downloads_front_page( $query ) {
+    // Only filter the main query on the front-end
+    if ( is_admin() || ! $query->is_main_query() ) {
+        return;
+    }
+    global $wp;
+    $front = false;
+  // If the latest posts are showing on the home page
+    if ( ( is_home() && empty( $wp->query_string ) ) ) {
+        $front = true;
+    }
+  // If a static page is set as the home page
+  
+    if ( ( $query->get( 'page_id' ) == get_option( 'page_on_front' ) && get_option( 'page_on_front' ) ) || empty( $wp->query_string ) ) {
+        $front = true;  
+    }
+    if ( $front ) :
+  
+        $query->set( 'post_type', 'car' );
+        $query->set( 'page_id', '' );
+        // Set properties to match an archive
+        $query->is_page = 0;
+        $query->is_singular = 0;
+        $query->is_post_type_archive = 1;
+        $query->is_archive = 1;
+    endif;
+  
+  //Fix pagination
+  if ( get_query_var('paged') ) {
+        $paged = get_query_var('paged');
+  } elseif ( get_query_var('page') ) {
+        $paged = get_query_var('page');
+  } else {
+        $paged = 1;
+  }
+  $query->set( 'paged', $paged );
+}
+add_action( 'pre_get_posts', 'prefix_downloads_front_page' );
+
+
+
+
+
+//End
+
+
+
+
+
 /**
  * Bootstrap Basic theme
  * 
